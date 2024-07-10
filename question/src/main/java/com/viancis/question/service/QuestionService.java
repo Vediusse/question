@@ -1,7 +1,7 @@
-package com.viancis.question.Service;
+package com.viancis.question.service;
 
-import Entities.Question.Question;
-import Response.ResponseQuestion;
+import entities.Question.Question;
+import response.ResponseQuestion;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

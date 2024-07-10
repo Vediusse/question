@@ -1,4 +1,4 @@
-package Entities.Question;
+package entities.Question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

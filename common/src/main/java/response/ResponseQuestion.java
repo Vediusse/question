@@ -1,6 +1,6 @@
-package Response;
+package response;
 
-import Entities.Question.Question;
+import entities.Question.Question;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;

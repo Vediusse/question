@@ -1,13 +1,13 @@
-package com.viancis.question.Controller;
+package com.viancis.question.controller;
 
-import Entities.Question.Question;
-import com.viancis.question.Service.QuestionService;
+import entities.Question.Question;
+import com.viancis.question.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import Response.ResponseQuestion;
+import response.ResponseQuestion;
 
 @RestController
 @RequestMapping("/questions")

@@ -1,18 +1,17 @@
-package com.viancis.question.Service;
+package com.viancis.question.service;
 
 
-import Entities.Question.Answer;
-import Entities.Question.Question;
-import com.viancis.question.Repository.AnswerRepository;
-import com.viancis.question.Repository.QuestionRepository;
+import entities.Question.Answer;
+import entities.Question.Question;
+import com.viancis.question.repository.AnswerRepository;
+import com.viancis.question.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import Response.ResponseQuestion;
+import response.ResponseQuestion;
 
 import java.util.List;
 

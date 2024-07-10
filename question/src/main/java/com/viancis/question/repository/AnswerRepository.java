@@ -1,7 +1,6 @@
-package com.viancis.question.Repository;
+package com.viancis.question.repository;
 
-import Entities.Question.Answer;
-import Entities.Question.Question;
+import entities.Question.Answer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
