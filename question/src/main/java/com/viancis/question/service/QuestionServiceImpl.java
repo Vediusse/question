@@ -1,8 +1,8 @@
 package com.viancis.question.service;
 
 
-import entities.Question.Answer;
-import entities.Question.Question;
+import entities.question.Answer;
+import entities.question.Question;
 import com.viancis.question.repository.AnswerRepository;
 import com.viancis.question.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +46,25 @@ public class QuestionServiceImpl implements QuestionService {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(optional -> optional.map(existingQuestion -> {
                     existingQuestion.setQuestion(question.getQuestion());
-                    existingQuestion.setAnswer(question.getAnswer());
-                    Question updatedQuestion = questionRepository.save(existingQuestion);
-                    ResponseQuestion response = new ResponseQuestion();
-                    response.setResultRequest("Запрос успешно обновлён");
-                    response.setStatus(HttpStatus.OK);
-                    response.setQuestion(updatedQuestion);
-                    return Mono.just(response);
+                    if (question.getAnswer() != null) {
+                        if (question.getAnswer().getId() == null) {
+                            Answer savedAnswer = answerRepository.save(question.getAnswer());
+                            existingQuestion.setAnswer(savedAnswer);
+                        } else {
+                            existingQuestion.setAnswer(question.getAnswer());
+                        }
+                    } else {
+                        existingQuestion.setAnswer(null);
+                    }
+                    return Mono.fromCallable(() -> questionRepository.save(existingQuestion))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .map(updatedQuestion -> {
+                                ResponseQuestion response = new ResponseQuestion();
+                                response.setResultRequest("Вопрос успешно обновлён");
+                                response.setStatus(HttpStatus.OK);
+                                response.setQuestion(updatedQuestion);
+                                return response;
+                            });
                 }).orElseGet(() -> {
                     ResponseQuestion response = new ResponseQuestion();
                     response.setResultRequest("Вопрос не найден");
