@@ -1,10 +1,11 @@
 package com.viancis.question.service;
 
 
-import entities.question.Answer;
-import entities.question.Question;
 import com.viancis.question.repository.AnswerRepository;
 import com.viancis.question.repository.QuestionRepository;
+import entities.question.Answer;
+import entities.question.Question;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import response.ResponseQuestion;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -27,9 +30,11 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Mono<ResponseQuestion> createQuestion(Question question) {
         return Mono.fromCallable(() -> {
-            if (question.getAnswer() != null && question.getAnswer().getId() == null) {
-                Answer savedAnswer = answerRepository.save(question.getAnswer());
-                question.setAnswer(savedAnswer);
+            Set<Answer> answers = question.getAnswers();
+            if (answers != null) {
+                for (Answer answer : answers) {
+                    answer.setQuestion(question);
+                }
             }
             Question savedQuestion = questionRepository.save(question);
             ResponseQuestion response = new ResponseQuestion();
@@ -46,25 +51,22 @@ public class QuestionServiceImpl implements QuestionService {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(optional -> optional.map(existingQuestion -> {
                     existingQuestion.setQuestion(question.getQuestion());
-                    if (question.getAnswer() != null) {
-                        if (question.getAnswer().getId() == null) {
-                            Answer savedAnswer = answerRepository.save(question.getAnswer());
-                            existingQuestion.setAnswer(savedAnswer);
-                        } else {
-                            existingQuestion.setAnswer(question.getAnswer());
+
+                    Set<Answer> newAnswers = question.getAnswers();
+                    if (newAnswers != null) {
+                        for (Answer answer : newAnswers) {
+                            answer.setQuestion(existingQuestion);
                         }
                     } else {
-                        existingQuestion.setAnswer(null);
+                        existingQuestion.setAnswers(new HashSet<>());
                     }
-                    return Mono.fromCallable(() -> questionRepository.save(existingQuestion))
-                            .subscribeOn(Schedulers.boundedElastic())
-                            .map(updatedQuestion -> {
-                                ResponseQuestion response = new ResponseQuestion();
-                                response.setResultRequest("Вопрос успешно обновлён");
-                                response.setStatus(HttpStatus.OK);
-                                response.setQuestion(updatedQuestion);
-                                return response;
-                            });
+
+                    Question savedQuestion = questionRepository.save(existingQuestion);
+                    ResponseQuestion response = new ResponseQuestion();
+                    response.setResultRequest("Вопрос успешно обновлён");
+                    response.setStatus(HttpStatus.OK);
+                    response.setQuestion(savedQuestion);
+                    return Mono.just(response);
                 }).orElseGet(() -> {
                     ResponseQuestion response = new ResponseQuestion();
                     response.setResultRequest("Вопрос не найден");
@@ -103,8 +105,6 @@ public class QuestionServiceImpl implements QuestionService {
         }).subscribeOn(Schedulers.boundedElastic()));
     }
 
-
-
     @Override
     public Mono<Void> deleteQuestion(Long id) {
         return Mono.fromRunnable(() -> questionRepository.deleteById(id))
@@ -112,4 +112,5 @@ public class QuestionServiceImpl implements QuestionService {
                 .then();
     }
 }
+
 

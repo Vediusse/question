@@ -21,6 +21,13 @@ public class Answer {
     @Min(value = 0, message = "Rating must be more than 0")
     private Integer rating = 0;
 
+    @ManyToOne
+    @JoinColumn(name = "question_id")
+    @JsonIgnore
+    private Question question;
+
+    @JsonIgnore
+    private boolean isBestAnswer;
 
     public Answer() {
     }
@@ -47,5 +54,17 @@ public class Answer {
 
     public void setRating(Integer rating) {
         this.rating = rating;
+    }
+
+    public void setBestAnswer(boolean bestAnswer) {
+        isBestAnswer = bestAnswer;
+    }
+
+    public boolean isBestAnswer() {
+        return isBestAnswer;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
     }
 }

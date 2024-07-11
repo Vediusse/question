@@ -1,51 +1,34 @@
 package response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import entities.question.Question;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public class ResponseQuestion {
 
-    private String resultRequest;
-    private HttpStatus status;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ResponseQuestion extends Response{
+    private Question obj;
 
-    private Question question;
-
-    private List<Question> questionList;
+    private List<Question> objList;
 
     public ResponseQuestion() {
     }
 
-    public String getResultRequest() {
-        return resultRequest;
-    }
-
-    public void setResultRequest(String resultRequest) {
-        this.resultRequest = resultRequest;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
     public Question getQuestion() {
-        return question;
+        return obj;
     }
 
     public void setQuestion(Question question) {
-        this.question = question;
+        this.obj = question;
     }
 
     public List<Question> getQuestionList() {
-        return questionList;
+        return objList;
     }
 
     public void setQuestionList(List<Question> questionList) {
-        this.questionList = questionList;
+        this.objList = questionList;
     }
 }

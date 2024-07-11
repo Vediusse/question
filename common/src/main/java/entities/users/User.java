@@ -1,5 +1,7 @@
 package entities.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -18,11 +20,11 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    private Role role;
 
     public User() {}
 
-    public User(String username, String password, String role) {
+    public User(String username, String password, Role role) {
         this.username = username;
         this.password = password;
         this.role = role;
@@ -52,11 +54,11 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

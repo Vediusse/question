@@ -3,6 +3,8 @@ package entities.question;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Question {
@@ -14,8 +16,8 @@ public class Question {
     @NotEmpty(message = "Question cannot be empty")
     private String question;
 
-    @OneToOne
-    private Answer answer;
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Answer> answers = new HashSet<>();
 
     public Question() {
     }
@@ -36,11 +38,26 @@ public class Question {
         this.question = question;
     }
 
-    public Answer getAnswer() {
-        return answer;
+    public Set<Answer> getAnswers() {
+        return answers;
     }
 
-    public void setAnswer(Answer answer) {
-        this.answer = answer;
+    public void setAnswers(Set<Answer> answers) {
+        this.answers = answers;
+    }
+
+    public void addAnswer(Answer answer) {
+        answers.add(answer);
+        answer.setQuestion(this);
+    }
+
+    public void setBestAnswer(Answer bestAnswer) {
+        for (Answer answer : answers) {
+            if (answer.equals(bestAnswer)) {
+                answer.setBestAnswer(true);
+            } else {
+                answer.setBestAnswer(false);
+            }
+        }
     }
 }

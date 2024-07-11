@@ -1,7 +1,7 @@
 package com.viancis.question.controller;
 
-import entities.question.Question;
 import com.viancis.question.service.QuestionService;
+import entities.question.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
