@@ -1,29 +1,28 @@
 package com.viancis.user.service;
 
-
-import entities.users.UserDTO;
-import exception.CustomAuthenticationException;
-import io.jsonwebtoken.SignatureException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import repository.UserRepository;
 import entities.users.Role;
 import entities.users.User;
+import entities.users.UserDTO;
+import exception.CustomAuthenticationException;
 import filter.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import repository.user.UserRepository;
 import response.ResponseUser;
-import response.ResponseUserConfidence;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -73,7 +72,6 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
-
     @Override
     public Mono<ResponseUser> login(User user) {
         return Mono.fromCallable(() -> {
@@ -97,13 +95,13 @@ public class UserServiceImpl implements UserService {
                                 response.setToken(token);
                                 return Mono.just(response);
                             } else {
-                                return Mono.error(new CustomAuthenticationException("Аунтетификация зафейлена - инетересно а как это так случилось )"));
+                                return Mono.error(new CustomAuthenticationException("Аутентификация зафейлена"));
                             }
                         } catch (AuthenticationException e) {
-                            return Mono.error(new CustomAuthenticationException("Аунтетификация зафейлена - инетересно а как это так случилось )"));
+                            return Mono.error(new CustomAuthenticationException("Аутентификация зафейлена"));
                         }
                     } else {
-                        return Mono.error(new CustomAuthenticationException("Аунтетификация зафейлена - инетересно а как это так случилось )"));
+                        return Mono.error(new CustomAuthenticationException("Аутентификация зафейлена"));
                     }
                 });
     }
@@ -127,22 +125,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Flux<ResponseUser> getAllUsers() {
-        return Flux.defer(() -> Mono.fromCallable(() -> userRepository.findAll())
+    public Mono<ResponseUser> getAllUsers() {
+        return Mono.fromCallable(() -> userRepository.findAll())
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(users -> Flux.fromIterable(users)
-                        .map(user -> {
-                            ResponseUser response = new ResponseUser();
-                            response.setResultRequest("Получены все пользователи");
-                            response.setStatus(HttpStatus.OK);
-                            response.setUser(new UserDTO(user));
-                            return response;
-                        })
-                ));
+                .flatMap(users -> {
+                    List<UserDTO> userDTOs = users.stream()
+                            .map(UserDTO::new)
+                            .collect(Collectors.toList());
+                    ResponseUser response = new ResponseUser();
+                    response.setResultRequest("Получены все пользователи");
+                    response.setStatus(HttpStatus.OK);
+
+                    response.setObjList(userDTOs);
+                    return Mono.just(response);
+                })
+                .onErrorResume(e -> {
+                    ResponseUser errorResponse = new ResponseUser();
+                    errorResponse.setResultRequest("Произошла ошибка: " + e.getMessage());
+                    errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    return Mono.just(errorResponse);
+                });
     }
 
     @Override
-    public Mono<ResponseUser> updateUser(Long id, User user) {
+    public Mono<ResponseUser> updateUser(Long id, User user, User currentUser) {
+        if ((currentUser.getRole().getLevel() < Role.ADMIN.getLevel()) || (Objects.equals(currentUser.getId(), id)) ) {
+            return Mono.error(new CustomAuthenticationException("Недостаточно прав для обновления пользователя"));
+        }
+
         return Mono.fromCallable(() -> userRepository.findById(id))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(optional -> optional.map(existingUser -> {
@@ -168,45 +178,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<Void> deleteUser(Long id) {
+    public Mono<Void> deleteUser(Long id, User currentUser) {
+        if ((currentUser.getRole().getLevel() != Role.ADMIN.getLevel()) || !(Objects.equals(currentUser.getId(), id))) {
+            return Mono.error(new CustomAuthenticationException("Недостаточно прав для удаления пользователя"));
+        }
+
         return Mono.fromRunnable(() -> userRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }
 
-
-    public Mono<ResponseUserConfidence> getUserByUsername(String username) {
-        return Mono.fromCallable(() -> userRepository.findByUsername(username))
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(optional -> optional.map(user -> {
-                    ResponseUserConfidence response = new ResponseUserConfidence();
-                    response.setResultRequest("Пользователь успешно найден");
-                    response.setStatus(HttpStatus.OK);
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
-                    response.setUser(user);
-                    return Mono.just(response);
-                }).orElseGet(() -> {
-                    ResponseUserConfidence response = new ResponseUserConfidence();
-                    response.setResultRequest("Пользователь не найден");
-                    response.setStatus(HttpStatus.NOT_FOUND);
-                    return Mono.just(response);
-                }));
-    }
-
     @Override
-    public Mono<ResponseUserConfidence> getCurrentUser(String token) {
-        if (token == null || token.isEmpty()) {
-            return Mono.error(new CustomAuthenticationException("Токен не найден"));
-        }
-        try {
-            String username = jwtTokenProvider.extractUsername(token);
-            return getUserByUsername(username);
-        } catch (SignatureException e) {
-            return Mono.error(new CustomAuthenticationException("Ошибка при дешифровке токена: " + e.getMessage()));
-        } catch (CustomAuthenticationException e) {
-            return Mono.error(e);
-        } catch (Exception e) {
-            return Mono.error(new CustomAuthenticationException("Произошла ошибка при обработке токена: " + e.getMessage()));
-        }
+    public Mono<ResponseUser> getUserByCurrentUser(User currentUser) {
+        return Mono.defer(() -> {
+            ResponseUser response = new ResponseUser();
+            if (currentUser == null) {
+                response.setResultRequest("Пользователь не найден");
+                response.setStatus(HttpStatus.NOT_FOUND);
+            } else {
+                response.setResultRequest("Пользователь успешно найден");
+                response.setStatus(HttpStatus.OK);
+                response.setUser(new UserDTO(currentUser));
+            }
+            return Mono.just(response);
+        });
     }
 }

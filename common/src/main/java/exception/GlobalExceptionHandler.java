@@ -13,14 +13,15 @@ import response.ResponseError;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
-        return new ResponseEntity<>(new ResponseError("Произошла ошибка: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(CustomAuthenticationException.class)
     public ResponseEntity<?> handleAuthenticationException(CustomAuthenticationException ex, WebRequest request) {
         return new ResponseEntity<>(new ResponseError(ex.getMessage(), HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+    }
+
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<?> handleAuthenticationException(NotFoundException ex, WebRequest request) {
+        return new ResponseEntity<>(new ResponseError(ex.getMessage(), HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(SignatureException.class)

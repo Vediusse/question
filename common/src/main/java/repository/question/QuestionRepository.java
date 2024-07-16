@@ -1,4 +1,4 @@
-package com.viancis.question.repository;
+package repository.question;
 
 import entities.question.Question;
 import org.springframework.data.jpa.repository.JpaRepository;

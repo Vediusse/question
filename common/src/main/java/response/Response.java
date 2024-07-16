@@ -1,7 +1,6 @@
 package response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import entities.users.User;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -16,7 +15,6 @@ public abstract class Response {
     private Object obj;
 
     private List<Object> objList;
-
 
 
     public String getResultRequest() {
@@ -34,9 +32,6 @@ public abstract class Response {
     public void setStatus(HttpStatus status) {
         this.status = status;
     }
-
-
-
 
 
 }

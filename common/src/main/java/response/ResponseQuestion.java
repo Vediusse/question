@@ -2,33 +2,33 @@ package response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import entities.question.Question;
-import org.springframework.http.HttpStatus;
+import entities.question.QuestionDTO;
 
 import java.util.List;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseQuestion extends Response{
-    private Question obj;
+public class ResponseQuestion extends Response {
+    private QuestionDTO obj;
 
-    private List<Question> objList;
+    private List<QuestionDTO> objList;
 
     public ResponseQuestion() {
     }
 
-    public Question getQuestion() {
+    public QuestionDTO getQuestion() {
         return obj;
     }
 
-    public void setQuestion(Question question) {
+    public void setQuestion(QuestionDTO question) {
         this.obj = question;
     }
 
-    public List<Question> getQuestionList() {
+    public List<QuestionDTO> getQuestionList() {
         return objList;
     }
 
-    public void setQuestionList(List<Question> questionList) {
+    public void setQuestionList(List<QuestionDTO> questionList) {
         this.objList = questionList;
     }
 }

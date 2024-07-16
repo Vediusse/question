@@ -7,13 +7,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "repository")
-@EntityScan(basePackages = {"entities.question", "entities.users"})
-@ComponentScan(basePackages = {"filter", "config" , "com.viancis.user", "repository", "exception"})
+@EnableJpaRepositories(basePackages = "repository.user")
+@EntityScan(basePackages = {"entities.question", "entities.users", "entities.comment"})
+@ComponentScan(basePackages = {"filter", "config", "com.viancis.user", "repository", "exception"})
 public class UserApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(UserApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(UserApplication.class, args);
+    }
 
 }

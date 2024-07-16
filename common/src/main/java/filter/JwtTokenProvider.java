@@ -20,10 +20,9 @@ import java.util.function.Function;
 @Component
 public class JwtTokenProvider {
 
+    private final UserDetailsService userDetailsService;
     @Value("${jwt.secret}")
     private String secret;
-
-    private final UserDetailsService userDetailsService;
 
     public JwtTokenProvider(@Lazy UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;

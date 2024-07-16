@@ -8,9 +8,7 @@ public enum Role {
     private final int level;
 
 
-
     private final String local;
-
 
 
     private final String description;

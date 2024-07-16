@@ -1,24 +1,17 @@
 package response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import entities.question.Question;
-import entities.users.User;
 import entities.users.UserDTO;
 
 import java.util.List;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseUser extends Response{
+public class ResponseUser extends Response {
 
     private UserDTO obj;
-
     private List<UserDTO> objList;
-
     private String token;
-
-
-
 
     public String getToken() {
         return token;
@@ -28,14 +21,6 @@ public class ResponseUser extends Response{
         this.token = token;
     }
 
-
-
-    public void setObjList(List<UserDTO> objList) {
-        this.objList = objList;
-    }
-
-
-
     public UserDTO getUser() {
         return obj;
     }
@@ -44,5 +29,12 @@ public class ResponseUser extends Response{
         this.obj = user;
     }
 
+    public List<UserDTO> getObjList() {
+        return objList;
+    }
 
+    public void setObjList(List<UserDTO> objList) {
+        this.objList = objList;
+    }
 }
+

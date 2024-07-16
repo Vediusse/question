@@ -9,6 +9,7 @@
         <module name="comment" />
         <module name="common" />
         <module name="question" />
+        <module name="answer" />
         <module name="user" />
       </profile>
     </annotationProcessing>
@@ -18,6 +19,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="answer" options="" />
       <module name="comment" options="" />
       <module name="common" options="" />
       <module name="question" options="" />

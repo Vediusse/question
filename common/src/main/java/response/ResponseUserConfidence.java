@@ -2,20 +2,17 @@ package response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import entities.users.User;
-import entities.users.UserDTO;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseUserConfidence extends Response{
+public class ResponseUserConfidence extends Response {
 
     private User obj;
 
     private List<User> objList;
 
     private String token;
-
-
 
 
     public String getToken() {
@@ -27,11 +24,9 @@ public class ResponseUserConfidence extends Response{
     }
 
 
-
     public void setObjList(List<User> objList) {
         this.objList = objList;
     }
-
 
 
     public User getUser() {

@@ -1,16 +1,27 @@
 package entities.users;
 
 public class UserDTO {
-
+    private Long id;
     private String username;
-    private Role role;
+    private RoleDTO role;
 
-    public UserDTO(User user) {
-        this.username = user.getUsername();
-        this.role = user.getRole();
+    public UserDTO() {
     }
 
+    public UserDTO(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.role = new RoleDTO(user.getRole());
+    }
 
+    // Геттеры и сеттеры для всех полей
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
@@ -20,13 +31,15 @@ public class UserDTO {
         this.username = username;
     }
 
-    public Role getRole() {
+
+
+    public RoleDTO getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(RoleDTO role) {
         this.role = role;
     }
-
-
 }
+
+
