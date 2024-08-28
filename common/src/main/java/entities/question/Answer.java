@@ -1,6 +1,8 @@
 package entities.question;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import entities.comment.Comment;
 import entities.users.User;
 
@@ -18,14 +20,17 @@ public class Answer {
     private Long id;
 
     @NotEmpty(message = "Answer cannot be empty")
+    @Column(name = "answer", length = 10000)
     private String answer;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonBackReference(value = "question-answers")
     private Question question;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference(value = "user-answers")
     private User user;
 
     @NotEmpty(message = "Rating cannot be empty")
@@ -34,6 +39,7 @@ public class Answer {
     private Integer rating = 0;
 
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "answer-comments")
     private Set<Comment> comments = new HashSet<>();
 
     private boolean bestAnswer;
@@ -95,5 +101,18 @@ public class Answer {
 
     public void setRating(Integer rating) {
         this.rating = rating;
+    }
+
+    @Override
+    public String toString() {
+        return "Answer{" +
+                "id=" + id +
+                ", answer='" + answer + '\'' +
+                ", question=" + question +
+                ", user=" + user +
+                ", rating=" + rating +
+                ", comments=" + comments +
+                ", bestAnswer=" + bestAnswer +
+                '}';
     }
 }

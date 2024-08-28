@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = {"entities.comment", "entities.question", "entities.users"})
 @ComponentScan(basePackages = {"filter", "config", "com.viancis", "exception"})
 public class CommentApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(CommentApplication.class, args);
     }

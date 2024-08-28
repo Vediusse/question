@@ -20,7 +20,9 @@ import java.util.function.Function;
 @Component
 public class JwtTokenProvider {
 
+
     private final UserDetailsService userDetailsService;
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -32,7 +34,6 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
@@ -67,7 +68,7 @@ public class JwtTokenProvider {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return false;
     }
 
     public String resolveToken(HttpServletRequest request) {

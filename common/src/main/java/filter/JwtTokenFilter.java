@@ -36,12 +36,25 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String token = jwtTokenProvider.resolveToken(request);
+
+
+        if ("/questions/paginated".equals(request.getRequestURI())) {
+            if(token != null && jwtTokenProvider.validateToken(token)){
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                filterChain.doFilter(request, response);
+                return;
+            }
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (skipPaths.matches(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = jwtTokenProvider.resolveToken(request);
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);

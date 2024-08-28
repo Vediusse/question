@@ -1,8 +1,10 @@
 package entities.users;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import entities.comment.Comment;
 import entities.question.Answer;
 import entities.question.Question;
+import exception.InvalidRoleException;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,25 +25,21 @@ public class User implements Serializable {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "user-questions")
     private Set<Question> questions = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "user-answers")
     private Set<Answer> answers = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "user-comments")
     private Set<Comment> comments = new HashSet<>();
-
-    public Set<Comment> getComments() {
-        return comments;
-    }
-
-    public void setComments(Set<Comment> comments) {
-        this.comments = comments;
-    }
 
     public User() {}
 
@@ -107,6 +105,14 @@ public class User implements Serializable {
     public void addAnswer(Answer answer) {
         answers.add(answer);
         answer.setUser(this);
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
     }
 
     @Override

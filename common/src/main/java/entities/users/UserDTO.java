@@ -1,8 +1,16 @@
 package entities.users;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserDTO {
+
+    @JsonProperty("id")
     private Long id;
+
+    @JsonProperty("username")
     private String username;
+
+    @JsonProperty("role")
     private RoleDTO role;
 
     public UserDTO() {

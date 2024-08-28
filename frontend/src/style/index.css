@@ -1,0 +1,67 @@
+@font-face {
+  font-family: 'Maitree';
+  src: url('./fonts/Maitree/Maitree-Light.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Jura';
+  src: url('./fonts/Jura/Jura-VariableFont_wght.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Podkova';
+  src: url('./fonts/Podkova/Podkova-VariableFont_wght.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none; /* Disable scrollbar for Firefox */
+}
+
+html {
+  font-size: 16px; /* Set base font size */
+  color: #ffffff;
+  scroll-behavior: smooth; /* Enable smooth scrolling */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Disable scrollbar for WebKit browsers */
+}
+
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+button{
+  border: none;
+  background: none;
+}
+
+#root {
+  flex-grow: 1;
+}
+
+.main-section{
+  
+}
+
+a{
+  text-decoration: none;
+
+}
+/* Add more global styles here */
+
+
+

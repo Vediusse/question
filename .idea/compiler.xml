@@ -6,14 +6,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="comment" />
         <module name="common" />
         <module name="question" />
         <module name="answer" />
+        <module name="comment" />
         <module name="user" />
+        <module name="email" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="email (1) (org.example)" target="20" />
+      <module name="email (2) (com.viancis)" target="1.5" />
       <module name="questionBand" target="1.5" />
     </bytecodeTargetLevel>
   </component>
@@ -22,6 +25,7 @@
       <module name="answer" options="" />
       <module name="comment" options="" />
       <module name="common" options="" />
+      <module name="email" options="" />
       <module name="question" options="" />
       <module name="user" options="" />
     </option>

@@ -3,12 +3,15 @@ package com.viancis.comment.service;
 import entities.comment.Comment;
 import entities.comment.CommentDTO;
 import entities.question.Answer;
+import entities.question.AnswerDTO;
 import entities.question.Question;
+import entities.question.QuestionDTO;
 import entities.users.Role;
 import entities.users.User;
 import exception.CustomAuthenticationException;
 import exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import repository.question.AnswerRepository;
 import repository.question.QuestionRepository;
 import response.ResponseComment;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +39,17 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Autowired
+    private ReactiveRedisTemplate<String, Object> redisTemplate;
+
+    private static final String COMMENT_CACHE_KEY = "comment:";
+
+    private static final String QUESTION_CACHE_KEY = "question:";
+
+
+    private static final String ANSWER_CACHE_KEY = "answer:";
+
+
     @Override
     @Transactional
     public Mono<ResponseComment> createCommentForQuestion(Comment comment, User currentUser, Long questionId) {
@@ -45,24 +60,32 @@ public class CommentServiceImpl implements CommentService {
                     if (optionalQuestion.isPresent()) {
                         Question question = optionalQuestion.get();
                         comment.setQuestion(question);
-                        return getMono(comment);
+
+                        if (comment.getContent() == null || comment.getContent().isEmpty()) {
+                            return Mono.error(new IllegalArgumentException("Поле 'content' не может быть пустым"));
+                        }
+
+                        return saveComment(comment)
+                                .flatMap(responseComment -> {
+                                    QuestionDTO questionDTO = new QuestionDTO(question);
+                                    questionDTO.getComments().add(new CommentDTO(comment));
+
+
+                                    return Mono.fromRunnable(() -> {
+                                        redisTemplate.opsForValue()
+                                                .set(QUESTION_CACHE_KEY + questionId, questionDTO, Duration.ofHours(1))
+                                                .doOnSuccess(result -> System.out.println("Successfully saved questionDTO to Redis"))
+                                                .doOnError(error -> System.out.println("Error saving questionDTO to Redis: " + error.getMessage()))
+                                                .subscribe();
+                                    }).thenReturn(responseComment);
+                                });
                     } else {
                         return Mono.error(new NotFoundException("Вопрос не найден"));
                     }
                 });
     }
 
-    private Mono<? extends ResponseComment> getMono(Comment comment) {
-        return Mono.fromCallable(() -> commentRepository.save(comment))
-                .subscribeOn(Schedulers.boundedElastic())
-                .map(savedComment -> {
-                    ResponseComment response = new ResponseComment();
-                    response.setResultRequest("Комментарий успешно создан");
-                    response.setStatus(HttpStatus.CREATED);
-                    response.setObj(new CommentDTO(savedComment));
-                    return response;
-                });
-    }
+
 
     @Override
     @Transactional
@@ -74,24 +97,60 @@ public class CommentServiceImpl implements CommentService {
                     if (optionalAnswer.isPresent()) {
                         Answer answer = optionalAnswer.get();
                         comment.setAnswer(answer);
-                        return getMono(comment);
+
+                        if (comment.getContent() == null || comment.getContent().isEmpty()) {
+                            return Mono.error(new IllegalArgumentException("Поле 'content' не может быть пустым"));
+                        }
+
+                        return saveComment(comment)
+                                .flatMap(responseComment -> {
+                                    AnswerDTO answerDTO = new AnswerDTO(answer);
+                                    QuestionDTO questionDTO = new QuestionDTO(answer.getQuestion());
+
+                                    answerDTO.getComments().add(new CommentDTO(comment));
+                                    questionDTO.getComments().add(new CommentDTO(comment));
+                                    return Mono.fromRunnable(() -> {
+                                        redisTemplate.opsForValue()
+                                                .set(ANSWER_CACHE_KEY + answerId, answerDTO, Duration.ofHours(1))
+                                                .doOnSuccess(result -> System.out.println("Successfully saved to Redis"))
+                                                .doOnError(error -> System.out.println("Error saving to Redis: " + error.getMessage()))
+                                                .subscribe();
+                                        redisTemplate.opsForValue()
+                                                .set(QUESTION_CACHE_KEY + answer.getQuestion().getId(), questionDTO, Duration.ofHours(1)).subscribe();
+                                    }).thenReturn(responseComment);
+                                });
                     } else {
                         return Mono.error(new NotFoundException("Ответ не найден"));
                     }
                 });
     }
 
+    private Mono<ResponseComment> saveComment(Comment comment) {
+        return Mono.fromCallable(() -> commentRepository.save(comment))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(savedComment -> redisTemplate.opsForValue()
+                        .set(COMMENT_CACHE_KEY + savedComment.getId(), new CommentDTO(savedComment), Duration.ofHours(1))
+                        .then(Mono.just(createResponseComment(new CommentDTO(savedComment), "Комментарий успешно создан", HttpStatus.CREATED))));
+    }
+
     @Override
     public Mono<ResponseComment> getCommentById(Long id) {
-        return Mono.fromCallable(() -> commentRepository.findById(id))
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(optional -> optional.map(comment -> {
-                    ResponseComment response = new ResponseComment();
-                    response.setResultRequest("Комментарий успешно найден");
-                    response.setStatus(HttpStatus.OK);
-                    response.setObj(new CommentDTO(comment));
-                    return Mono.just(response);
-                }).orElseGet(() -> Mono.error(new NotFoundException("Комментарий не найден"))));
+        return redisTemplate.opsForValue()
+                .get(COMMENT_CACHE_KEY + id)
+                .flatMap(serializedComment -> {
+                    try {
+                        CommentDTO comment = (CommentDTO) serializedComment;
+                        return Mono.just(createResponseComment(comment, "Комментарий успешно найден", HttpStatus.OK));
+                    } catch (Exception e) {
+                        return Mono.error(new Exception("Ошибка при получении комментария из кеша Redis"));
+                    }
+                })
+                .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() -> commentRepository.findById(id))
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .flatMap(optional -> optional.map(comment -> redisTemplate.opsForValue()
+                                        .set(COMMENT_CACHE_KEY + comment.getId(), new CommentDTO(comment), Duration.ofHours(1))
+                                        .thenReturn(createResponseComment(new CommentDTO(comment), "Комментарий успешно найден", HttpStatus.OK)))
+                                .orElseGet(() -> Mono.error(new NotFoundException("Комментарий не найден"))))));
     }
 
     @Override
@@ -110,6 +169,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public Mono<ResponseComment> updateComment(Long id, Comment comment, User currentUser) {
         if (!comment.getUser().equals(currentUser)) {
             return Mono.error(new CustomAuthenticationException("Недостаточно прав для обновления комментария"));
@@ -118,25 +178,35 @@ public class CommentServiceImpl implements CommentService {
         return Mono.fromCallable(() -> commentRepository.findById(id))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(optional -> optional.map(existingComment -> {
-                    existingComment.setContent(comment.getContent());
-                    existingComment.setCreatedAt(comment.getCreatedAt());
-                    Comment savedComment = commentRepository.save(existingComment);
-                    ResponseComment response = new ResponseComment();
-                    response.setResultRequest("Комментарий успешно обновлён");
-                    response.setStatus(HttpStatus.OK);
-                    response.setObj(new CommentDTO(savedComment));
-                    return Mono.just(response);
-                }).orElseGet((() -> Mono.error(new NotFoundException("Комментарий не найден")))));
+                            existingComment.setContent(comment.getContent());
+                            existingComment.setCreatedAt(comment.getCreatedAt());
+                            return existingComment;
+                        })
+                        .map(Mono::just)
+                        .orElseGet((() -> Mono.error(new NotFoundException("Комментарий не найден"))))
+                        .flatMap(commentToUpdate -> Mono.fromCallable(() -> commentRepository.save(commentToUpdate))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .flatMap(savedComment -> redisTemplate.opsForValue()
+                                        .set(COMMENT_CACHE_KEY + savedComment.getId(), new CommentDTO(savedComment), Duration.ofHours(1))
+                                        .then(Mono.just(createResponseComment(new CommentDTO(savedComment), "Комментарий успешно обновлён", HttpStatus.OK))))
+                        ));
     }
 
     @Override
     public Mono<Void> deleteComment(Long id, User currentUser) {
-        if ((currentUser.getRole().getLevel() < Role.ADMIN.getLevel())) {
-            return Mono.error(new CustomAuthenticationException("Недостаточно прав для обновления (так сказать) ответа"));
+        if (currentUser.getRole().getLevel() < Role.ADMIN.getLevel()) {
+            return Mono.error(new CustomAuthenticationException("Недостаточно прав для удаления комментария"));
         }
         return Mono.fromRunnable(() -> commentRepository.deleteById(id))
                 .subscribeOn(Schedulers.boundedElastic())
-                .then();
+                .then(redisTemplate.delete(COMMENT_CACHE_KEY + id).then());
+    }
+
+    private ResponseComment createResponseComment(CommentDTO comment, String message, HttpStatus status) {
+        ResponseComment response = new ResponseComment();
+        response.setResultRequest(message);
+        response.setStatus(status);
+        response.setObj(comment);
+        return response;
     }
 }
-

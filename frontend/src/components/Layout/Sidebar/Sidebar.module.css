@@ -1,0 +1,118 @@
+.sidebar {
+    width: 22.875vw;
+    min-width: 14.5rem;
+    max-width: 22.875rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    box-sizing: border-box;
+    border-right: 1px solid rgb(56, 61, 177);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.wrapper {
+    width: 80%;
+    height: 93.75vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 1.25rem 0;
+    margin-right: 1rem;
+}
+
+.menu {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+}
+
+.button {
+    width: 100%;
+    height: 3.125rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 0.625rem;
+    margin-bottom: 0.625rem;
+    border-radius: 0.625rem;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+
+.buttonActive {
+    border-radius: 0.625rem;
+    background: rgb(44, 47, 48);
+}
+
+.buttonImage {
+    width: 1.875rem;
+    height: 1.875rem;
+    margin-right: 10px;
+}
+
+.buttonText {
+    color: rgb(255, 255, 255);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Podkova', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    letter-spacing: 0%;
+    text-align: left;
+}
+
+
+@media (max-width: 768px) {
+    .header {
+        padding: 0.625rem 1rem; /* Adjust padding for smaller screens */
+    }
+    .sidebar {
+        display: none; /* Hide sidebar on mobile devices */
+    }
+    .main-content {
+        display: flex;
+        flex-direction: column; /* Switch to vertical direction */
+        flex-grow: 1; /* Stretch to fill remaining height */
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        flex-direction: row; /* Keep in a single row */
+        padding: 0.625rem 1rem; /* Adjust padding for smaller screens */
+    }
+    .nav {
+        flex-direction: row; /* Keep in a single row */
+    }
+    .sidebar {
+        display: none; /* Hide sidebar on mobile devices */
+    }
+    .main-content {
+        display: flex;
+        flex-direction: column; /* Switch to vertical direction */
+        flex-grow: 1; /* Stretch to fill remaining height */
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .logo__text {
+        display: none; /* Hide logo text on very small screens */
+    }
+}

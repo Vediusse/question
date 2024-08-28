@@ -1,6 +1,7 @@
 package filter;
 
 import annotation.CurrentUser;
+import annotation.OptionalCurrentUser;
 import entities.users.User;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterAnnotation(CurrentUser.class) != null && parameter.getParameterType().equals(User.class);
+        return (parameter.getParameterAnnotation(CurrentUser.class) != null && parameter.getParameterType().equals(User.class)) ||
+                (parameter.getParameterAnnotation(OptionalCurrentUser.class) != null && parameter.getParameterType().equals(User.class));
     }
 
     @Override
@@ -36,7 +38,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             return userRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         }
+        if (parameter.getParameterAnnotation(OptionalCurrentUser.class) != null) {
+            return null;
+        }
         return null;
     }
 }
-

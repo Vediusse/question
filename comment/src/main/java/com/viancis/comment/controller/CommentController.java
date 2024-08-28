@@ -46,7 +46,9 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "Question not found")
             }
     )
-    public Mono<ResponseComment> createCommentForQuestion(@RequestBody Comment comment, @CurrentUser User currentUser, @PathVariable Long id) {
+    public Mono<ResponseComment> createCommentForQuestion(@org.springframework.web.bind.annotation.RequestBody Comment comment, @CurrentUser User currentUser, @PathVariable Long id) {
+        System.out.println(comment);
+        System.out.println("\n\n\n\n\n");
         return commentService.createCommentForQuestion(comment, currentUser, id);
     }
 
@@ -72,7 +74,7 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "Answer not found")
             }
     )
-    public Mono<ResponseComment> createCommentForAnswer(@RequestBody Comment comment, @CurrentUser User currentUser, @PathVariable Long id) {
+    public Mono<ResponseComment> createCommentForAnswer(@org.springframework.web.bind.annotation.RequestBody Comment comment, @CurrentUser User currentUser, @PathVariable Long id) {
         return commentService.createCommentForAnswer(comment, currentUser, id);
     }
 
@@ -135,7 +137,7 @@ public class CommentController {
                     @ApiResponse(responseCode = "403", description = "Insufficient rights to update the comment")
             }
     )
-    public Mono<ResponseComment> updateComment(@PathVariable Long id, @RequestBody Comment comment, @CurrentUser User currentUser) {
+    public Mono<ResponseComment> updateComment(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestBody Comment comment, @CurrentUser User currentUser) {
         return commentService.updateComment(id, comment, currentUser);
     }
 

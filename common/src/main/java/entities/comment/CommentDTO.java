@@ -37,6 +37,19 @@ public class CommentDTO {
         }
     }
 
-    // геттеры и сеттеры
+    public CommentDTO() {
+    }
+
+    @Override
+    public String toString() {
+        return "CommentDTO{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", createdAt=" + createdAt +
+                ", user=" + user +
+                ", questionId=" + questionId +
+                ", answerId=" + answerId +
+                '}';
+    }
 }
 

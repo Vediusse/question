@@ -2,16 +2,25 @@ package response;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entities.comment.CommentDTO;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseComment {
+public class ResponseComment extends Response{
+
+    @JsonProperty("resultRequest")
     private String resultRequest;
+
+    @JsonProperty("status")
     private HttpStatus status;
+
+    @JsonProperty("obj")
     private CommentDTO obj;
+
+    @JsonProperty("objList")
     private List<CommentDTO> objList;
 
     public String getResultRequest() {

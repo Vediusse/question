@@ -12,6 +12,7 @@
         <module>common</module>
         <module>comment</module>
         <module>answer</module>
+        <module>email</module>
     </modules>
 
     <properties>
@@ -55,15 +56,25 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
+
+
             <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>${kafka.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>3.2.3</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${spring-kafka.version}</version>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+                <version>6.3.1.RELEASE</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-resolver-dns-native-macos</artifactId>
+                <scope>runtime</scope>
+                <classifier>osx-aarch_64</classifier>
+                <version>4.1.111.Final</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

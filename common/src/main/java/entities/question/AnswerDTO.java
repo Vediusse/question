@@ -1,5 +1,6 @@
 package entities.question;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entities.comment.CommentDTO;
 import entities.users.UserDTO;
 
@@ -7,15 +8,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AnswerDTO {
-
+    @JsonProperty("id")
     private Long id;
 
+
+    @JsonProperty("answer")
     private String answer;
 
+
+    @JsonProperty("rating")
     private Integer rating;
 
+
+    @JsonProperty("answerer")
     private UserDTO answerer;
 
+
+    @JsonProperty("comments")
     private Set<CommentDTO> comments;
 
     public AnswerDTO(Answer answer) {
@@ -26,6 +35,9 @@ public class AnswerDTO {
         this.comments = answer.getComments().stream()
                 .map(CommentDTO::new)
                 .collect(Collectors.toSet());
+    }
+
+    public AnswerDTO() {
     }
 
     public String getAnswer() {
@@ -66,5 +78,21 @@ public class AnswerDTO {
 
     public void setComments(Set<CommentDTO> comments) {
         this.comments = comments;
+    }
+
+
+    public void setComment(CommentDTO comment){
+        this.comments.add(comment);
+    }
+
+    @Override
+    public String toString() {
+        return "AnswerDTO{" +
+                "id=" + id +
+                ", answer='" + answer + '\'' +
+                ", rating=" + rating +
+                ", answerer=" + answerer +
+                ", comments=" + comments +
+                '}';
     }
 }

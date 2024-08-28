@@ -5,6 +5,7 @@ import com.viancis.user.service.UserService;
 import entities.users.User;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import response.ResponseError;
@@ -74,8 +75,8 @@ public class UserController {
             )
     })
     @PostMapping("/auth")
-    public Mono<ResponseUser> auth(@RequestBody User user) {
-        return userService.auth(user);
+    public Mono<ResponseEntity<ResponseUser>> auth(@RequestBody User user) {
+        return userService.auth(user).map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
 
     @Operation(
@@ -129,8 +130,8 @@ public class UserController {
             )
     })
     @PostMapping("/login")
-    public Mono<ResponseUser> login(@RequestBody User user) {
-        return userService.login(user);
+    public Mono<ResponseEntity<ResponseUser>> login(@RequestBody User user) {
+        return userService.login(user).map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
 
     @Operation(summary = "Get user by ID", description = "Retrieves a user by their ID.")
@@ -170,9 +171,11 @@ public class UserController {
             )
     })
     @GetMapping("/{id}")
-    public Mono<ResponseUser> getUserById(@Parameter(description = "ID of the user to retrieve") @PathVariable Long id) {
-        return userService.getUserById(id);
+    public Mono<ResponseEntity<ResponseUser>> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
+
 
     @Operation(summary = "Get all users", description = "Retrieves all users.")
     @ApiResponses(value = {
@@ -200,8 +203,9 @@ public class UserController {
             )
     })
     @GetMapping
-    public Mono<ResponseUser> getAllUsers() {
-        return userService.getAllUsers();
+    public Mono<ResponseEntity<ResponseUser>> getAllUsers() {
+        return userService.getAllUsers()
+                .map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
 
     @Operation(
@@ -266,11 +270,11 @@ public class UserController {
             )
     })
     @PutMapping("/{id}")
-    public Mono<ResponseUser> updateUser(
+    public Mono<ResponseEntity<ResponseUser>> updateUser(
             @Parameter(description = "ID of the user to update") @PathVariable Long id,
             @RequestBody User user,
             @Parameter(hidden = true) @CurrentUser User currentUser) {
-        return userService.updateUser(id, user, currentUser);
+        return userService.updateUser(id, user, currentUser).map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
 
     @Operation(summary = "Delete user by ID", description = "Deletes a user by their ID.")
@@ -325,7 +329,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ResponseError.class)))
     })
     @GetMapping("/me")
-    public Mono<ResponseUser> getCurrentUser(@Parameter(hidden = true) @CurrentUser User currentUser) {
-        return userService.getUserByCurrentUser(currentUser);
+    public Mono<ResponseEntity<ResponseUser>> getCurrentUser(@Parameter(hidden = true) @CurrentUser User currentUser) {
+        return userService.getUserByCurrentUser(currentUser).map(responseQuestion -> new ResponseEntity<>(responseQuestion, responseQuestion.getStatus()));
     }
 }

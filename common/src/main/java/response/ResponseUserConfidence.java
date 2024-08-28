@@ -1,6 +1,7 @@
 package response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entities.users.User;
 
 import java.util.List;
@@ -8,10 +9,10 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseUserConfidence extends Response {
 
+
     private User obj;
-
     private List<User> objList;
-
+    @JsonProperty("token")
     private String token;
 
 
