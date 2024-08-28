@@ -22,3 +22,6 @@ buildNumber.properties
 .idea/
 
 email
+
+
+!**/src/main/resources/application.properties
